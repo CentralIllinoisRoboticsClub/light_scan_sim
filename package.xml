@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<package>
+<package format="3">
   <name>light_scan_sim</name>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <description>The light_scan_sim package simulates a laser scan originating from a TF against a costmap.</description>
 
   <maintainer email="josephgeek@gmail.com">Joseph Duchesne</maintainer>
@@ -11,31 +11,33 @@
 
   <url type="website">https://github.com/josephduchesne/light_scan_sim</url>
 
-  <!-- Use build_depend for packages you need at compile time: -->
-  <build_depend>message_generation</build_depend>
-  <!-- Use buildtool_depend for build tool packages: -->
-  <buildtool_depend>catkin</buildtool_depend>
-  <!-- Use run_depend for packages you need at runtime: -->
-  <run_depend>message_runtime</run_depend>
-  <!-- Use test_depend for packages you need only for testing: -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_common</test_depend>
   <test_depend>gtest</test_depend>
-  <buildtool_depend>catkin</buildtool_depend>
   <test_depend>rosunit</test_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>nav_msgs</build_depend>
-  <build_depend>tf</build_depend> 
-  <build_depend>libopencv-dev</build_depend> 
-  <run_depend>roscpp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>map_server</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>nav_msgs</run_depend>
-  <run_depend>libopencv-dev</run_depend>
-  <run_depend>visualization_msgs</run_depend>
+  
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>libopencv-dev</depend>
+  <depend>builtin_interfaces</depend>
+  
+  <build_depend>rosidl_default_generators</build_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <member_of_group>rosidl_interface_packages</member_of_group>
+  
+  <exec_depend>map_server</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>

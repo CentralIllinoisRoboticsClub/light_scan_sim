@@ -9,7 +9,7 @@
 #ifndef LIGHT_SCAN_SIM_RAY_CAST_H
 #define LIGHT_SCAN_SIM_RAY_CAST_H
 
-#include <sensor_msgs/LaserScan.h>
+#include <sensor_msgs/msg/laser_scan.hpp>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -53,13 +53,13 @@ class RayCast {
       m_per_px_ = m_per_px;
     };
 
-    void SetSegments(light_scan_sim::SegmentList &segments, light_scan_sim::MaterialList &materials) {
+    void SetSegments(light_scan_sim::msg::SegmentList &segments, light_scan_sim::msg::MaterialList &materials) {
       wall_segments_ = std::make_shared<WallSegmentSim>(segments, materials);
     }
 
     bool Trace(cv::Point2f &start, cv::Point2f &end, cv::Point2f &hit);
   
-    sensor_msgs::LaserScan Scan(cv::Point2f start, double yaw);
+    sensor_msgs::msg::LaserScan Scan(cv::Point2f start, double yaw);
 };
 
 #endif

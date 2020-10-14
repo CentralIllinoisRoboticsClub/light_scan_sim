@@ -6,28 +6,29 @@
  * @author Joseph Duchesne
  */
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include "light_scan_sim/light_scan_sim.h"
 
 /**
  * @brief Init node and update the sim at the desired rate
  */
 int main(int argc, char** argv){
-  ros::init(argc, argv, "light_scan_sim");
+  //Initiate ROS
+  rclcpp::init(argc, argv);
+  rclcpp::NodeOptions node_options;
+  auto lidar_sim_node = std::make_shared<LightScanSim>(node_options);
 
-  ros::NodeHandle node("~");
+  RCLCPP_INFO(lidar_sim_node->get_logger(), "Starting Light Scan Simulator");
+  int loop_hz = lidar_sim_node->get_rate();
+  rclcpp::Rate rate(loop_hz);
 
-  LightScanSim sim(node); 
-
-  ros::Rate rate(node.param<double>("laser/hz", 40.0));
-
-  while (node.ok()){
-    ros::spinOnce();  // Read any waiting messages
-
-    sim.Update();  // Update the simulated laser scan
-
-    rate.sleep();  // Wait until the 
+  //rclcpp::spin(nav_states_node);
+  while(rclcpp::ok())
+  {
+    rclcpp::spin_some(lidar_sim_node);
+    lidar_sim_node->Update();
+    rate.sleep();
   }
 
   return 0;
-};
+}

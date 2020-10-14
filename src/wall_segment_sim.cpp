@@ -10,7 +10,7 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
-#include <light_scan_sim/Material.h>
+#include <light_scan_sim/msg/material.hpp>
 #include <utility>
 
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
@@ -21,7 +21,7 @@
  * @param segments  The list of segments making up the world
  * @param materials The list of materials making up the world
  */
-WallSegmentSim::WallSegmentSim(light_scan_sim::SegmentList segments, light_scan_sim::MaterialList materials) {
+WallSegmentSim::WallSegmentSim(light_scan_sim::msg::SegmentList segments, light_scan_sim::msg::MaterialList materials) {
   segments_ = segments;
   materials_ = materials;
 
@@ -58,13 +58,13 @@ bool WallSegmentSim::Trace(double x, double y, double theta, double length, doub
   // Todo: Create list of all collided lines, sort and process in order
   
   //check every fixture of every body to find closest
-  typedef std::pair<b2RayCastOutput, light_scan_sim::Material*> HitPair;
+  typedef std::pair<b2RayCastOutput, light_scan_sim::msg::Material*> HitPair;
   std::vector<HitPair> hits;
 
   for (b2Body* body = world_->GetBodyList(); body; body = body->GetNext()) {
     for (b2Fixture* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
       b2RayCastOutput output;
-      light_scan_sim::Material* material = (light_scan_sim::Material*)(body->GetUserData());
+      light_scan_sim::msg::Material* material = (light_scan_sim::msg::Material*)(body->GetUserData());
       // ROS_INFO_STREAM("fixture: " << segment->start[0] << ", " << segment->start[1]);
       if ( ! fixture->RayCast( &output, input, 0) ) {
         continue;
@@ -139,5 +139,5 @@ void WallSegmentSim::InitializeWorld() {
     segment_body->SetUserData(&materials_.materials[i.type]);  // Reference this segment as user data
   }
 
-  ROS_ERROR("Initialize world completed");
+  std::cout << "Initialize world completed";
 }

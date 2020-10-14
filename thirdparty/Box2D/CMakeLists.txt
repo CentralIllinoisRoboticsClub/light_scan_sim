@@ -125,6 +125,9 @@ set(BOX2D_General_HDRS
 
 include_directories(../)
 
+#ament_export_targets(export_box2D HAS_LIBRARY_TARGET)
+#ament_export_dependencies(some_dependency)
+
 add_library(Box2D_shared SHARED
 	${BOX2D_General_HDRS}
 	${BOX2D_Joints_SRCS}
@@ -150,8 +153,9 @@ set_target_properties(Box2D_shared PROPERTIES
 
 install(TARGETS 
   Box2D_shared
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  EXPORT export_box2D
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib
 )
 

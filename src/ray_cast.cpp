@@ -47,8 +47,8 @@ bool RayCast::Trace(cv::Point2f &start, cv::Point2f &end, cv::Point2f &hit) {
  *
  * @return a laser scan message
  */
-sensor_msgs::LaserScan RayCast::Scan(cv::Point2f start, double yaw) {
-  sensor_msgs::LaserScan scan;
+sensor_msgs::msg::LaserScan RayCast::Scan(cv::Point2f start, double yaw) {
+  sensor_msgs::msg::LaserScan scan;
 
   scan.angle_min = angle_min_;
   scan.angle_max = angle_max_;

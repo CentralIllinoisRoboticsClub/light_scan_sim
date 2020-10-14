@@ -9,24 +9,24 @@
 #ifndef LIGHT_SCAN_SIM_WALL_SEGMENT_SIM_H
 #define LIGHT_SCAN_SIM_WALL_SEGMENT_SIM_H
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <opencv2/core/core.hpp>
-#include <light_scan_sim/SegmentList.h>
-#include <light_scan_sim/MaterialList.h>
+#include <light_scan_sim/msg/segment_list.hpp>
+#include <light_scan_sim/msg/material_list.hpp>
 #include <Box2D/Box2D.h>
 #include <random>
 
 class WallSegmentSim {
   private:
-    light_scan_sim::SegmentList segments_;
-    light_scan_sim::MaterialList materials_;
+    light_scan_sim::msg::SegmentList segments_;
+    light_scan_sim::msg::MaterialList materials_;
 
     std::shared_ptr<b2World> world_ = nullptr;
   
     void InitializeWorld();
 
   public:
-    WallSegmentSim(light_scan_sim::SegmentList segments, light_scan_sim::MaterialList materials);
+    WallSegmentSim(light_scan_sim::msg::SegmentList segments, light_scan_sim::msg::MaterialList materials);
 
     bool Trace(double x, double y, double theta, double length, double ray_max, double &range);
   
