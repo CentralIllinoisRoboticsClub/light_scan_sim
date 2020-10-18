@@ -23,6 +23,8 @@ using std::placeholders::_2;
 LightScanSim::LightScanSim(const rclcpp::NodeOptions& node_options) :
 Node("light_scan_sim", node_options), tf_broadcaster_(this)
 {
+  materials_loaded_ = true;
+  segments_loaded_ = true;
   // https://github.com/ros-planning/navigation2/blob/foxy-devel/nav2_amcl/src/amcl_node.cpp
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
@@ -30,9 +32,15 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
       get_node_timers_interface());
   tf_buffer_->setCreateTimerInterface(timer_interface);
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+  rclcpp::sleep_for(std::chrono::seconds(1));
 
-  tf_buffer_->lookupTransform("laser", "odom", rclcpp::Time(0), rclcpp::Duration(10.0));
-  tf_buffer_->lookupTransform("base_link", "odom", rclcpp::Time(0), rclcpp::Duration(10.0));
+  //LookupException
+  try{
+    tf_buffer_->lookupTransform("laser", "odom", rclcpp::Time(0), rclcpp::Duration(10.0));
+    tf_buffer_->lookupTransform("base_link", "odom", rclcpp::Time(0), rclcpp::Duration(10.0));
+  } catch (tf2::TransformException &ex) {
+    RCLCPP_WARN(get_logger(), "LightScanSim: %s",ex.what());
+  }
 
   declare_parameter("freq_hz", 20.0);
   freq_hz_ = get_parameter("freq_hz").as_double();
@@ -55,7 +63,7 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
   declare_parameter("map/materials_topic", "map_materials");
   declare_parameter("map/segments_topic", "map_segments");
   declare_parameter("laser/topic", "scan");
-  declare_parameter("map/image_frame", "map");
+  declare_parameter("map/image_frame", "map_image");
   declare_parameter("laser/frame", "laser");
 
   map_topic_ = get_parameter("map/topic").as_string();
@@ -70,6 +78,8 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
   materials_sub_ = create_subscription<light_scan_sim::msg::MaterialList>(materials_topic_, 1, std::bind(&LightScanSim::MaterialsCallback, this, _1) );
   segments_sub_ = create_subscription<light_scan_sim::msg::SegmentList>(segments_topic_, 1, std::bind(&LightScanSim::SegmentsCallback, this, _1) );
   laser_pub_ = create_publisher<sensor_msgs::msg::LaserScan>(laser_topic_, 1);
+
+  ray_cast_->SetSegments(segments_, materials_);
 }
 
 /**
