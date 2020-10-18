@@ -30,6 +30,13 @@
 
 #include "light_scan_sim/ray_cast.h"
 
+// https://github.com/ros2/demos/blob/master/lifecycle/src/lifecycle_service_client.cpp
+#include <chrono>
+#include "lifecycle_msgs/msg/state.hpp"
+#include "lifecycle_msgs/msg/transition.hpp"
+#include "lifecycle_msgs/srv/change_state.hpp"
+#include "lifecycle_msgs/srv/get_state.hpp"
+
 class LightScanSim: public rclcpp::Node
 {
   double freq_hz_;
@@ -71,6 +78,15 @@ class LightScanSim: public rclcpp::Node
 
     void Update();
     double get_rate();
+
+  private:
+
+    std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::ChangeState>> m_client_change_state;
+
+    template<typename FutureT, typename WaitTimeT>
+    std::future_status wait_for_result(FutureT & future, WaitTimeT time_to_wait);
+
+    bool change_state(std::uint8_t transition, std::chrono::seconds time_out = std::chrono::seconds(3));
 
 };
 

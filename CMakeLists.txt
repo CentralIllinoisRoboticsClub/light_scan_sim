@@ -13,6 +13,8 @@ endif()
 find_package(ament_cmake)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -37,6 +39,8 @@ add_subdirectory("thirdparty/Box2D")
 
 include_directories(
   ${OpenCV_INCLUDE_DIRS}
+  ${lifecycle_msgs_INCLUDE_DIRS}
+  ${rclcpp_lifecycle_INCLUDE_DIRS}
   include
   thirdparty
 )
@@ -65,6 +69,7 @@ ament_target_dependencies(light_scan_sim_node
 ## Specify libraries to link a library or executable target against
 target_link_libraries(light_scan_sim_node
   ${OpenCV_LIBRARIES}
+  ${rclcpp_lifecycle_LIBRARIES}
   Box2D_shared
 )
 

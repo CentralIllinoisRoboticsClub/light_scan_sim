@@ -15,6 +15,11 @@
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+// which node to handle
+static constexpr char const * lifecycle_node = "map_server";
+static constexpr char const * node_get_state_topic = "map_server/get_state";
+static constexpr char const * node_change_state_topic = "map_server/change_state";
+
 /**
  * @brief Initialize light scan sim class
  *
@@ -80,6 +85,30 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
   laser_pub_ = create_publisher<sensor_msgs::msg::LaserScan>(laser_topic_, 1);
 
   ray_cast_->SetSegments(segments_, materials_);
+
+  m_client_change_state = this->create_client<lifecycle_msgs::srv::ChangeState>(node_change_state_topic);
+  for(uint8_t k=0; k<2; ++k)
+  {
+    if (!change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE))
+    {
+      RCLCPP_WARN(get_logger(), "LightScanSim failed to activate map_server, trying deactivate");
+      if (!change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE))
+      {
+        RCLCPP_WARN(get_logger(), "LightScanSim failed to deactivate map_server");
+      }
+      else
+      {
+        if(change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE))
+        {
+          break;
+        }
+      }
+    }
+    else
+    {
+      break;
+    }
+  }
 }
 
 /**
@@ -200,4 +229,57 @@ void LightScanSim::Update() {
 double LightScanSim::get_rate()
 {
   return freq_hz_;
+}
+
+template<typename FutureT, typename WaitTimeT>
+std::future_status LightScanSim::wait_for_result(FutureT & future, WaitTimeT time_to_wait)
+{
+  auto end = std::chrono::steady_clock::now() + time_to_wait;
+  std::chrono::milliseconds wait_period(100);
+  std::future_status status = std::future_status::timeout;
+  do {
+    auto now = std::chrono::steady_clock::now();
+    auto time_left = end - now;
+    if (time_left <= std::chrono::seconds(0)) {break;}
+    status = future.wait_for((time_left < wait_period) ? time_left : wait_period);
+  } while (rclcpp::ok() && status != std::future_status::ready);
+  return status;
+}
+
+bool LightScanSim::change_state(std::uint8_t transition, std::chrono::seconds time_out)
+{
+  auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
+  request->transition.id = transition;
+
+  /*if (m_client_change_state->wait_for_service(time_out)) {
+    RCLCPP_ERROR(
+        get_logger(),
+        "Service %s is not available.",
+        m_client_change_state->get_service_name());
+    return false;
+  }*/
+
+  // We send the request with the transition we want to invoke.
+  auto future_result = m_client_change_state->async_send_request(request);
+
+  // Let's wait until we have the answer from the node.
+  // If the request times out, we return an unknown state.
+  auto future_status = wait_for_result(future_result, time_out);
+
+  if (future_status != std::future_status::ready) {
+    RCLCPP_ERROR(
+        get_logger(), "Server time out while getting current state for node %s", lifecycle_node);
+    return false;
+  }
+
+  // We have an answer, let's print our success.
+  if (future_result.get()->success) {
+    RCLCPP_INFO(
+        get_logger(), "Transition %d successfully triggered.", static_cast<int>(transition));
+    return true;
+  } else {
+    RCLCPP_WARN(
+        get_logger(), "Failed to trigger transition %u", static_cast<unsigned int>(transition));
+    return false;
+  }
 }
