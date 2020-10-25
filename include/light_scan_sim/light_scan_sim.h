@@ -69,6 +69,8 @@ class LightScanSim: public rclcpp::Node
   std::string image_frame_ = "/map_image";
   std::string laser_frame_ = "/initialpose";
 
+  bool m_reset_map_server;
+
   public:
     LightScanSim(const rclcpp::NodeOptions& node_options);
 

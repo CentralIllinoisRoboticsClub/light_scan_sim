@@ -78,6 +78,9 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
   image_frame_ = get_parameter("map/image_frame").as_string();
   laser_frame_ = get_parameter("laser/frame").as_string();
 
+  declare_parameter("reset_map_server", false);
+  m_reset_map_server = get_parameter("reset_map_server").as_bool();
+
   // Subscribe / Publish
   map_sub_ = create_subscription<nav_msgs::msg::OccupancyGrid>(map_topic_, 1, std::bind(&LightScanSim::MapCallback, this, _1) );
   materials_sub_ = create_subscription<light_scan_sim::msg::MaterialList>(materials_topic_, 1, std::bind(&LightScanSim::MaterialsCallback, this, _1) );
@@ -86,27 +89,30 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
 
   ray_cast_->SetSegments(segments_, materials_);
 
-  m_client_change_state = this->create_client<lifecycle_msgs::srv::ChangeState>(node_change_state_topic);
-  for(uint8_t k=0; k<2; ++k)
+  if(m_reset_map_server)
   {
-    if (!change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE))
+    m_client_change_state = this->create_client<lifecycle_msgs::srv::ChangeState>(node_change_state_topic);
+    for(uint8_t k=0; k<2; ++k)
     {
-      RCLCPP_WARN(get_logger(), "LightScanSim failed to activate map_server, trying deactivate");
-      if (!change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE))
+      if (!change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE))
       {
-        RCLCPP_WARN(get_logger(), "LightScanSim failed to deactivate map_server");
+        RCLCPP_WARN(get_logger(), "LightScanSim failed to activate map_server, trying deactivate");
+        if (!change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE))
+        {
+          RCLCPP_WARN(get_logger(), "LightScanSim failed to deactivate map_server");
+        }
+        else
+        {
+          if(change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE))
+          {
+            break;
+          }
+        }
       }
       else
       {
-        if(change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE))
-        {
-          break;
-        }
+        break;
       }
-    }
-    else
-    {
-      break;
     }
   }
 }
