@@ -12,10 +12,6 @@
   <url type="website">https://github.com/josephduchesne/light_scan_sim</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-
-  <test_depend>ament_lint_common</test_depend>
-  <test_depend>gtest</test_depend>
-  <test_depend>rosunit</test_depend>
   
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
@@ -34,7 +30,6 @@
   <exec_depend>rosidl_default_runtime</exec_depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
   
-  <exec_depend>map_server</exec_depend>
   <exec_depend>visualization_msgs</exec_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
   
