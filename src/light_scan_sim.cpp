@@ -41,8 +41,8 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
 
   //LookupException
   try{
-    tf_buffer_->lookupTransform("laser", "odom", rclcpp::Time(0), rclcpp::Duration(10.0));
-    tf_buffer_->lookupTransform("base_link", "odom", rclcpp::Time(0), rclcpp::Duration(10.0));
+    tf_buffer_->lookupTransform("laser", "odom", rclcpp::Time(0), rclcpp::Duration(10, 0));
+    tf_buffer_->lookupTransform("base_link", "odom", rclcpp::Time(0), rclcpp::Duration(10, 0));
   } catch (tf2::TransformException &ex) {
     RCLCPP_WARN(get_logger(), "LightScanSim: %s",ex.what());
   }
@@ -203,7 +203,7 @@ void LightScanSim::Update() {
   // Use that transform to generate a point in image space
   geometry_msgs::msg::TransformStamped image_to_laser;
   try{
-    image_to_laser = tf_buffer_->lookupTransform(image_frame_, laser_frame_, rclcpp::Time(0), rclcpp::Duration(10.0));
+    image_to_laser = tf_buffer_->lookupTransform(image_frame_, laser_frame_, rclcpp::Time(0), rclcpp::Duration(10, 0));
   } catch (tf2::TransformException &ex) {
     RCLCPP_WARN(get_logger(), "LightScanSim: %s",ex.what());
     return;
