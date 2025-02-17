@@ -58,13 +58,16 @@ class LightScanSim: public rclcpp::Node
   std::shared_ptr<rclcpp::Subscription<light_scan_sim::msg::MaterialList> > materials_sub_;
   std::shared_ptr<rclcpp::Subscription<light_scan_sim::msg::SegmentList> > segments_sub_;
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::LaserScan> > laser_pub_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::LaserScan>> laser_360_pub_;
   std::shared_ptr<RayCast> ray_cast_;
+  std::shared_ptr<RayCast> ray_cast_360_;
 
   // Configurable options
   std::string map_topic_ = "/map";
   std::string materials_topic_ = "/map_materials";
   std::string segments_topic_ = "/map_segments";
   std::string laser_topic_ = "/scan";
+  std::string laser_360_topic_ = "/scan_360";
 
   std::string image_frame_ = "/map_image";
   std::string laser_frame_ = "/initialpose";

@@ -57,6 +57,12 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
   declare_parameter("angle_increment", 0.01);
   declare_parameter("range_noise", 0.01);
   // Load settings
+  ray_cast_360_ = std::make_shared<RayCast>(get_parameter("range_min").as_double(),
+                                            get_parameter("range_max").as_double(),
+                                            -M_PI,
+                                            M_PI,
+                                            get_parameter("angle_increment").as_double(),
+                                            get_parameter("range_noise").as_double());
   ray_cast_ = std::make_shared<RayCast>(get_parameter("range_min").as_double(),
                                         get_parameter("range_max").as_double(),
                                         get_parameter("angle_min").as_double(),
@@ -86,8 +92,10 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
   materials_sub_ = create_subscription<light_scan_sim::msg::MaterialList>(materials_topic_, 1, std::bind(&LightScanSim::MaterialsCallback, this, _1) );
   segments_sub_ = create_subscription<light_scan_sim::msg::SegmentList>(segments_topic_, 1, std::bind(&LightScanSim::SegmentsCallback, this, _1) );
   laser_pub_ = create_publisher<sensor_msgs::msg::LaserScan>(laser_topic_, 1);
+  laser_360_pub_ = create_publisher<sensor_msgs::msg::LaserScan>(laser_360_topic_, 1);
 
   ray_cast_->SetSegments(segments_, materials_);
+  ray_cast_360_->SetSegments(segments_, materials_);
 
   if(m_reset_map_server)
   {
@@ -149,6 +157,7 @@ void LightScanSim::MapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr gri
   map_loaded_ = true;
   if (map_loaded_ && segments_loaded_ && materials_loaded_) {
     ray_cast_->SetSegments(segments_, materials_);
+    ray_cast_360_->SetSegments(segments_, materials_);
   }
 }
 
@@ -163,6 +172,7 @@ void LightScanSim::MaterialsCallback(const light_scan_sim::msg::MaterialList::Sh
 
   if (map_loaded_ && segments_loaded_ && materials_loaded_) {
     ray_cast_->SetSegments(segments_, materials_);
+    ray_cast_360_->SetSegments(segments_, materials_);
   }
 }
 
@@ -179,6 +189,7 @@ void LightScanSim::SegmentsCallback(const light_scan_sim::msg::SegmentList::Shar
 
   if (map_loaded_ && segments_loaded_ && materials_loaded_) {
     ray_cast_->SetSegments(segments_, materials_);
+    ray_cast_360_->SetSegments(segments_, materials_);
   }
 }
 
@@ -230,6 +241,16 @@ void LightScanSim::Update() {
 
   // And publish the laser scan
   laser_pub_->publish(scan);
+
+  // Generate the ray cast laser scan at that point and orientation
+  sensor_msgs::msg::LaserScan scan_360 = ray_cast_360_->Scan(laser_point, yaw);
+
+  // Set the header values
+  scan.header.stamp = image_to_laser.header.stamp; // Use correct time
+  scan.header.frame_id = laser_frame_;             // set laser's tf
+
+  // And publish the laser scan
+  laser_360_pub_->publish(scan_360);
 }
 
 double LightScanSim::get_rate()
