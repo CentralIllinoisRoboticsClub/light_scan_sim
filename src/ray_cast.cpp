@@ -60,7 +60,7 @@ sensor_msgs::msg::LaserScan RayCast::Scan(cv::Point2f start, double yaw) {
   cv::Point2f hit;
   double max_px = ray_max_/m_per_px_;
  
-  for (double a = angle_min_; a <= angle_max_; a+=angle_inc_) {
+  for (double a = angle_min_; a <= (angle_max_ + angle_inc_); a+=angle_inc_) {
     cv::Point2f end = cv::Point2f(start.x + max_px*cos(yaw+a),
                                   start.y + max_px*sin(yaw+a));
     

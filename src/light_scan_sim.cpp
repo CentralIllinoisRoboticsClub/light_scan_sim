@@ -41,8 +41,8 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
 
   //LookupException
   try{
-    tf_buffer_->lookupTransform("laser", "odom", rclcpp::Time(0), rclcpp::Duration(10, 0));
-    tf_buffer_->lookupTransform("base_link", "odom", rclcpp::Time(0), rclcpp::Duration(10, 0));
+    tf_buffer_->lookupTransform("sim_laser", "sim_odom", rclcpp::Time(0), rclcpp::Duration(10, 0));
+    tf_buffer_->lookupTransform("sim_base_link", "sim_odom", rclcpp::Time(0), rclcpp::Duration(10, 0));
   } catch (tf2::TransformException &ex) {
     RCLCPP_WARN(get_logger(), "LightScanSim: %s",ex.what());
   }
@@ -64,19 +64,21 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
                                         get_parameter("angle_increment").as_double(),
                                         get_parameter("range_noise").as_double() );
 
-  declare_parameter("map/topic", "map");
-  declare_parameter("map/materials_topic", "map_materials");
-  declare_parameter("map/segments_topic", "map_segments");
-  declare_parameter("laser/topic", "scan");
-  declare_parameter("map/image_frame", "map_image");
-  declare_parameter("laser/frame", "laser");
+  declare_parameter("map.topic", "map");
+  declare_parameter("map.materials_topic", "map_materials");
+  declare_parameter("map.segments_topic", "map_segments");
+  declare_parameter("laser.topic", "scan");
+  declare_parameter("map.image_frame", "map_image");
+  declare_parameter("laser.frame", "laser");
+  declare_parameter("laser.frame_out", "laser");
 
-  map_topic_ = get_parameter("map/topic").as_string();
-  materials_topic_ = get_parameter("map/materials_topic").as_string();
-  segments_topic_ = get_parameter("map/segments_topic").as_string();
-  laser_topic_ = get_parameter("laser/topic").as_string();
-  image_frame_ = get_parameter("map/image_frame").as_string();
-  laser_frame_ = get_parameter("laser/frame").as_string();
+  map_topic_ = get_parameter("map.topic").as_string();
+  materials_topic_ = get_parameter("map.materials_topic").as_string();
+  segments_topic_ = get_parameter("map.segments_topic").as_string();
+  laser_topic_ = get_parameter("laser.topic").as_string();
+  image_frame_ = get_parameter("map.image_frame").as_string();
+  laser_frame_ = get_parameter("laser.frame").as_string();
+  laser_frame_out_ = get_parameter("laser.frame_out").as_string();
 
   declare_parameter("reset_map_server", false);
   m_reset_map_server = get_parameter("reset_map_server").as_bool();
@@ -226,7 +228,7 @@ void LightScanSim::Update() {
 
   // Set the header values
   scan.header.stamp = image_to_laser.header.stamp;  // Use correct time
-  scan.header.frame_id = laser_frame_;  // set laser's tf
+  scan.header.frame_id = laser_frame_out_;  // set laser's tf
 
   // And publish the laser scan
   laser_pub_->publish(scan);
