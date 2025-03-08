@@ -41,8 +41,8 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
 
   //LookupException
   try{
-    tf_buffer_->lookupTransform("sim_laser", "sim_odom", rclcpp::Time(0), rclcpp::Duration(10, 0));
-    tf_buffer_->lookupTransform("sim_base_link", "sim_odom", rclcpp::Time(0), rclcpp::Duration(10, 0));
+    tf_buffer_->lookupTransform(laser_frame_, odom_frame_, rclcpp::Time(0), rclcpp::Duration(10, 0));
+    tf_buffer_->lookupTransform(base_frame_, odom_frame_, rclcpp::Time(0), rclcpp::Duration(10, 0));
   } catch (tf2::TransformException &ex) {
     RCLCPP_WARN(get_logger(), "LightScanSim: %s",ex.what());
   }
@@ -71,6 +71,8 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
   declare_parameter("map.image_frame", "map_image");
   declare_parameter("laser.frame", "laser");
   declare_parameter("laser.frame_out", "laser");
+  declare_parameter("laser.base_frame", "base_link");
+  declare_parameter("laser.odom_frame", "odom");
 
   map_topic_ = get_parameter("map.topic").as_string();
   materials_topic_ = get_parameter("map.materials_topic").as_string();
@@ -79,6 +81,8 @@ Node("light_scan_sim", node_options), tf_broadcaster_(this)
   image_frame_ = get_parameter("map.image_frame").as_string();
   laser_frame_ = get_parameter("laser.frame").as_string();
   laser_frame_out_ = get_parameter("laser.frame_out").as_string();
+  base_frame_ = get_parameter("laser.base_frame").as_string();
+  odom_frame_ = get_parameter("laser.odom_frame").as_string();
 
   declare_parameter("reset_map_server", false);
   m_reset_map_server = get_parameter("reset_map_server").as_bool();
